@@ -1,17 +1,18 @@
-import React, { useState, useEffect} from 'react';
-import axios from 'axios';
+import React, { useEffect} from 'react';
+import { useDispatch, useSelector} from 'react-redux'
 import { Row, Col, Image, ListGroup, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Rating from "../components/Rating";
+import { listProductsDetails } from '../action/productAction '
+import Loader from './../components/Loader';
+import Message from './../components/Message';
 const ProductScreen = ({match}) => {
-    const [product, setProduct] = useState({});
+    const dispatch = useDispatch();
+    const productDetails = useSelector(state => state.productDetails);
+    const { loading, error, product} =productDetails;
     useEffect(() => {
-        const fetchdata = async () => {
-            const {data} = await axios.get(`/api/products/${match.params.id}`);
-            setProduct(data);
-        }
-        fetchdata();
-    }, [match]);
+        dispatch(listProductsDetails(match.params.id))
+    }, [dispatch]);
     console.log(product);
    // const product = products.find(p => p._id === match.params.id);
     return ( 
@@ -19,6 +20,7 @@ const ProductScreen = ({match}) => {
         <Link className='btn btn-light my-3' to="/">
             Go Back
         </Link>
+        {loading ? <Loader/>: error ? <Message variant='danger'>{error}</Message> : 
         <Row>
             <Col md={6}>
                 <Image src={product.image} alt={product.name} fluid/>
@@ -56,7 +58,7 @@ const ProductScreen = ({match}) => {
                         <Row>
                             <Col>status:</Col>
                             <Col>
-                               {product.countInStock > 0 ? "In stock" : "Out of stock"}
+                            {product.countInStock > 0 ? "In stock" : "Out of stock"}
                             </Col>
                         </Row>
                     </ListGroup.Item>
@@ -68,6 +70,7 @@ const ProductScreen = ({match}) => {
                 </ListGroup>
             </Col>
         </Row>
+        }        
        </>
     );
 }
